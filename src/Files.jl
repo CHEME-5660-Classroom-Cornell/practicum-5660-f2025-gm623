@@ -30,14 +30,31 @@ MyTrainingMarketDataSet() = _jld2(joinpath(_PATH_TO_DATA, "SP500-Daily-OHLC-1-3-
 Load the ticker-picker bandit model results computed in the `Setup-L14a-Example-RiskAware-BBBP-Ticker-Picker-Fall-2025.ipynb` notebook.
 """
 function MyTickerPickerBanditModelResults(;mood::Symbol = :neutral)::Dict{String, Any}
-    if (mood == :optimistic) 
-        return _jld2(joinpath(_PATH_TO_DATA, "Ticker-Picker-Preferences-Optimistic-Fall-2025.jld2"));
+    # determine file name based on mood
+    filename = if (mood == :optimistic)
+        "Ticker-Picker-Preferences-Optimistic-Fall-2025.jld2"
     elseif (mood == :pessimistic)
-        return _jld2(joinpath(_PATH_TO_DATA, "Ticker-Picker-Preferences-Pessimistic-Fall-2025.jld2"));
+        "Ticker-Picker-Preferences-Pessimistic-Fall-2025.jld2"
     elseif (mood == :neutral)
-        return _jld2(joinpath(_PATH_TO_DATA, "Ticker-Picker-Preferences-Neutral-Fall-2025.jld2"));
+        "Ticker-Picker-Preferences-Neutral-Fall-2025.jld2"
     else
-        error("Invalid mood specified: $mood. Valid options are :optimistic, :neutral, :pessimistic.");
+        error("Invalid mood specified: $mood. Valid options are :optimistic, :neutral, :pessimistic.")
     end
+
+    path = joinpath(_PATH_TO_DATA, filename)
+
+    # Provide a clearer error message if the expected file is missing and show available files
+    if !isfile(path)
+        available = readdir(_PATH_TO_DATA)
+        error_msg = "Ticker-picker preferences file not found: $(path)\n"
+        error_msg *= "Available files in data directory: \n"
+        for f in available
+            error_msg *= "  - $(f)\n"
+        end
+        error_msg *= "\nTo create the expected preferences files, run the `Setup-L14a-Example-RiskAware-BBBP-Ticker-Picker-Fall-2025.ipynb` notebook or place the JLD2 files into the data directory."
+        error(error_msg)
+    end
+
+    return _jld2(path)
 end
 # -- PUBLIC FUNCTIONS ABOVE HERE ------------------------------------------------------------------------------ #
